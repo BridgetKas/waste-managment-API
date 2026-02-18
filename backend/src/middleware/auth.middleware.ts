@@ -1,21 +1,27 @@
 
 import dotenv from 'dotenv'
 import { type Request, type Response,type NextFunction } from 'express';
-import jwt, { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
+import jwt   from 'jsonwebtoken';
+import pkg from 'jsonwebtoken'
+
+const { JsonWebTokenError, TokenExpiredError } = pkg;
 
 dotenv.config({quiet:true})
 
-const secretKey = process.env.JWT_SECRET || 'your_secret_key'
+const secretKey = process.env.JWT_SECRET
+
+if (!secretKey) {
+  throw new Error('FATAL ERROR: JWT_SECRET is not defined.');
+}
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'No token provided' });
+    return res.status(401).json({ message: 'Access Denied No token provided' });
   }
 
   const token = authHeader.split(' ')[1];
-  const secretKey = process.env.JWT_SECRET; 
 
   try {
     const decoded = jwt.verify(token as string, secretKey as string) ;
